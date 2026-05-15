@@ -1,4 +1,5 @@
 // Copyright 2022 NNTU-CS
+// Copyright 2022 NNTU-CS
 #include "train.h"
 
 Train::Train() : countOp(0), first(nullptr) {}
@@ -25,27 +26,27 @@ void Train::addCar(bool light) {
 int Train::getLength() {
   if (first == nullptr) return 0;
 
-  bool startLight = first->light;
-  int distance = 1;
+  first->light = true;
+  int steps = 1;
+  int length = 1;
 
   while (true) {
-    for (int i = 0; i < distance; i++) {
+    for (int i = 0; i < steps; i++) {
       first = first->next;
       countOp++;
     }
-
-    first->light = !first->light;
-
-    for (int i = 0; i < distance; i++) {
-      first = first->prev;
-      countOp++;
+    
+    if (first->light == false) {
+      first->light = true;
+      steps++;
+      length = steps;
+      for (int i = 0; i < steps; i++) {
+        first = first->prev;
+        countOp++;
+      }
+    } else {
+      return length;
     }
-
-    if (first->light != startLight) {
-      return distance;
-    }
-
-    distance++;
   }
 }
 
