@@ -25,12 +25,10 @@ void Train::addCar(bool light) {
 int Train::getLength() {
   if (first == nullptr) return 0;
 
-  // Выключаем свет в первом вагоне (маркер)
   first->light = false;
   int steps = 1;
 
   while (true) {
-    // Идём вперёд, включая свет
     for (int i = 0; i < steps; i++) {
       first = first->next;
       countOp++;
@@ -39,13 +37,11 @@ int Train::getLength() {
       }
     }
 
-    // Возвращаемся назад
     for (int i = 0; i < steps; i++) {
       first = first->prev;
       countOp++;
     }
 
-    // Проверяем маркер
     if (!first->light) {
       steps++;
       first->light = false;
