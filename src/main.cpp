@@ -1,69 +1,47 @@
 // Copyright 2022 NNTU-CS
-
+#include "train.h"
 #include <iostream>
 #include <fstream>
-#include <cstdlib>
-#include <ctime>
-#include "train.h"
+#include <random>
 
-Train* makeTrain(int n, int mode) {
-  Train *t = new Train();
+Train createTrain(int n, int type) {
+  Train train;
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> dis(0, 1);
+  
   for (int i = 0; i < n; i++) {
-    bool light;
-    if (mode == 0)      light = false;
-    else if (mode == 1) light = true;
-    else                light = (rand() % 2 == 1);
-    t->addCar(light);
+    if (type == 0) train.addCar(false);
+    else if (type == 1) train.addCar(true);
+    else train.addCar(dis(gen));
   }
-  return t;
+  return train;
 }
 
 int main() {
-  srand(static_cast<unsigned>(time(nullptr)));
-
-  const int minN    = 2;
-  const int maxN    = 150;  
-  const int step    = 2;
-  const int repeats = 10;    
-
-  std::ofstream csv("result/data.csv");
-  csv << "n,ops_off,ops_on,ops_random,theoretical\n";
-  std::cout << "n\tops_off\tops_on\tops_random\ttheoretical\n";
-
-  for (int n = minN; n <= maxN; n += step) {
+  std::ofstream file("data.csv");
+  file << "n,all_off,all_on,random\n";
+  
+  for (int n = 2; n <= 100; n++) {
+    long long off_sum = 0, on_sum = 0, rand_sum = 0;
     
-    Train *t0 = makeTrain(n, 0);
-    t0->getLength();
-    int ops_off = t0->getOpCount();
-    delete t0;
-
-
-    Train *t1 = makeTrain(n, 1);
-    t1->getLength();
-    int ops_on = t1->getOpCount();
-    delete t1;
-
-
-    long long sum = 0;
-    for (int r = 0; r < repeats; r++) {
-      Train *tr = makeTrain(n, 2);
-      tr->getLength();
-      sum += tr->getOpCount();
-      delete tr;
+    for (int trial = 0; trial < 10; trial++) {
+      Train t_off = createTrain(n, 0);
+      Train t_on = createTrain(n, 1);
+      Train t_rand = createTrain(n, 2);
+      
+      t_off.getLength();
+      t_on.getLength();
+      t_rand.getLength();
+      
+      off_sum += t_off.getOpCount();
+      on_sum += t_on.getOpCount();
+      rand_sum += t_rand.getOpCount();
     }
-    int ops_random = static_cast<int>(sum / repeats);
-
     
-    int theory = n * (n + 1);
-
-    csv << n << "," << ops_off << "," << ops_on << "," << ops_random
-        << "," << theory << "\n";
-    std::cout << n << "\t" << ops_off << "\t" << ops_on << "\t"
-              << ops_random << "\t" << theory << "\n";
+    file << n << "," << off_sum/10.0 << "," << on_sum/10.0 << "," << rand_sum/10.0 << "\n";
   }
-
-  csv.close();
-  std::cout << "\nДанные сохранены в result/data.csv\n";
-  std::cout << "Запустите plot.py для построения графика.\n";
+  
+  file.close();
   return 0;
 }
