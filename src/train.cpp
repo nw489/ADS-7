@@ -48,7 +48,6 @@ int Train::getLength() {
     distance++;
   }
 }
-}
 
 int Train::getOpCount() {
   return countOp;
