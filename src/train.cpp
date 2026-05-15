@@ -8,7 +8,7 @@ void Train::addCar(bool light) {
   newCar->light = light;
   newCar->next = nullptr;
   newCar->prev = nullptr;
-  
+
   if (first == nullptr) {
     first = newCar;
     first->next = first;
@@ -24,28 +24,34 @@ void Train::addCar(bool light) {
 
 int Train::getLength() {
   if (first == nullptr) return 0;
-  
-  bool startLight = first->light;
-  int distance = 1;
-  
+
+  // Выключаем свет в первом вагоне (маркер)
+  first->light = false;
+  int steps = 1;
+
   while (true) {
-    for (int i = 0; i < distance; i++) {
+    // Идём вперёд, включая свет
+    for (int i = 0; i < steps; i++) {
       first = first->next;
       countOp++;
+      if (!first->light) {
+        first->light = true;
+      }
     }
-    
-    first->light = !first->light;
-    
-    for (int i = 0; i < distance; i++) {
+
+    // Возвращаемся назад
+    for (int i = 0; i < steps; i++) {
       first = first->prev;
       countOp++;
     }
-    
-    if (first->light != startLight) {
-      return distance;
+
+    // Проверяем маркер
+    if (!first->light) {
+      steps++;
+      first->light = false;
+    } else {
+      return steps;
     }
-    
-    distance++;
   }
 }
 
