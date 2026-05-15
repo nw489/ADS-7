@@ -1,63 +1,51 @@
 // Copyright 2022 NNTU-CS
 #include "train.h"
-#include <cstddef>
-
 
 Train::Train() : countOp(0), first(nullptr) {}
 
-Train::~Train() {
-  if (!first) return;
-  Car *cur = first->next;
-  while (cur != first) {
-    Car *tmp = cur->next;
-    delete cur;
-    cur = tmp;
-  }
-  delete first;
-}
-
 void Train::addCar(bool light) {
-  Car *car = new Car{light, nullptr, nullptr};
-  if (!first) {
-    car->next = car;
-    car->prev = car;
-    first = car;
+  Car* newCar = new Car;
+  newCar->light = light;
+  newCar->next = nullptr;
+  newCar->prev = nullptr;
+  
+  if (first == nullptr) {
+    first = newCar;
+    first->next = first;
+    first->prev = first;
   } else {
-    Car *last = first->prev;
-    last->next = car;
-    car->prev = last;
-    car->next = first;
-    first->prev = car;
+    Car* last = first->prev;
+    last->next = newCar;
+    newCar->prev = last;
+    newCar->next = first;
+    first->prev = newCar;
   }
 }
 
 int Train::getLength() {
-  if (!first) return 0;
-  countOp = 0;
-
-  bool startLight = first->light; 
-  for (int k = 1; ; k++) {
-
-    Car *cur = first;
-    for (int i = 0; i < k; i++) {
-      cur = cur->next;
+  if (first == nullptr) return 0;
+  
+  bool startLight = first->light;
+  int distance = 1;
+  
+  while (true) {
+    for (int i = 0; i < distance; i++) {
+      first = first->next;
       countOp++;
     }
-
-    cur->light = !cur->light;
-
-
-    for (int i = 0; i < k; i++) {
-      cur = cur->prev;
+    
+    first->light = !first->light;
+    
+    for (int i = 0; i < distance; i++) {
+      first = first->prev;
       countOp++;
     }
-
-
-
+    
     if (first->light != startLight) {
-      first->light = startLight; 
-      return k;
+      return distance;
     }
+    
+    distance++;
   }
 }
 
